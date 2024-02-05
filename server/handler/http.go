@@ -35,15 +35,17 @@ func (h *HTTPHandler) GetOrders(c *gin.Context) {
 		fmt.Println("Decoded search term:", decodedSearchQuery)
 	
 		page, err := strconv.Atoi(pageStr)
+
+		fmt.Println(page, pageStr)
 		if err != nil || page <= 0 {
 			page = 1
 		}
 	
-		orders, err := h.orderRepo.GetOrders(searchQuery, startDateStr, endDateStr, sortDirection, pageStr)
+		orders, totalPages, err := h.orderRepo.GetOrders(searchQuery, startDateStr, endDateStr, sortDirection, page)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			return
 		}
 	
-		c.JSON(http.StatusOK, orders)
+		c.JSON(http.StatusOK, gin.H{"orders": orders, "currentPage": page, "totalPages": totalPages})
 }

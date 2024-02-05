@@ -3,7 +3,6 @@ package repository
 import (
     "database/sql"
 	"fmt"
-	"strconv"
 	"time"
     model "order-service/model"
 )
@@ -17,21 +16,15 @@ func NewOrderRepository(db *sql.DB) *OrderRepository {
 }
 
 // GetOrders retrieves orders based on search, filtering, and pagination
-func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirection, page string) ([]model.JoinedOrder, error) {
+func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirection string, page int) ([]model.JoinedOrder, int, error) {
 	// Set a default value for page if it's empty
-	if page == "" {
-		page = "1"
+	if page == 0 {
+		page = 1
 	}
 
-	pageInt, err := strconv.Atoi(page)
-
-	if err != nil {
-		fmt.Println("Error converting page string to integer:", err)
-		return nil, err
-	}
-	
+	fmt.Println(page, "got here")
 	// Calculate offset for pagination
-    offset := (pageInt - 1) * 5
+	offset := (page - 1) * 5
 
 	var args []interface{}
 
@@ -59,18 +52,18 @@ func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirec
 	var location *time.Location
 
 	// Specify the location for Melbourne, Australia
-	location, err = time.LoadLocation("Australia/Melbourne")
+	location, err := time.LoadLocation("Australia/Melbourne")
 	if err != nil {
 		fmt.Println("Error loading location:", err)
-		return nil, err
-	}		
+		return nil, 0, err
+	}
 
 	// Add date range condition if startDate and endDate are provided
 	if startDate != "" {
 		parsedStartDate, err := time.ParseInLocation("2006-01-02", startDate, location)
 		if err != nil {
 			fmt.Println("Error parsing startDate:", err)
-			return nil, err
+			return nil, 0, err
 		}
 		// Set the time to the start of the day (00:00:00)
 		parsedStartDate = parsedStartDate.Truncate(24 * time.Hour)
@@ -84,7 +77,7 @@ func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirec
 		parsedEndDate, err := time.ParseInLocation("2006-01-02", endDate, location)
 		if err != nil {
 			fmt.Println("Error parsing endDate:", err)
-			return nil, err
+			return nil, 0, err
 		}
 		// Set the time to the end of the day (23:59:59)
 		parsedEndDate = parsedEndDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
@@ -111,6 +104,17 @@ func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirec
 		args = append(args, "%"+searchTerm+"%")
 	}
 
+	fmt.Println("totalRecordsgot here")
+
+	totalRecords, err := repo.countTotalRecords(sqlQuery, args)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	fmt.Println(totalRecords, "???")
+	// Calculate the total number of pages
+	totalPages := (totalRecords + 5 - 1) / 5
+
 	// Add pagination
 	sqlQuery += fmt.Sprintf(" GROUP BY o.id, cc.company_name, c.name ORDER BY o.created_at %s LIMIT 5 OFFSET %d", sortDirection, offset)
 	fmt.Println(sqlQuery)
@@ -119,9 +123,9 @@ func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirec
 	rows, err := repo.db.Query(sqlQuery, args...)
 	if err != nil {
 		fmt.Println(err)
-		return nil, err
+		return nil, 0, err
 	}
-    defer rows.Close()
+	defer rows.Close()
 
 	fmt.Println(rows)
 
@@ -139,10 +143,27 @@ func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirec
 			&order.TotalAmount,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		orders = append(orders, order)
 	}
 
-	return orders, nil
+	return orders, totalPages, nil
+}
+
+func (repo *OrderRepository) countTotalRecords(sqlQuery string, args []interface{}) (int, error) {
+	sqlQuery += fmt.Sprintf(" GROUP BY o.id, cc.company_name, c.name")
+
+	countQuery := "SELECT COUNT(*) FROM (" + sqlQuery + ") AS count_query"
+
+	fmt.Println(countQuery, "query <<<")
+
+	var totalRecords int
+	err := repo.db.QueryRow(countQuery, args...).Scan(&totalRecords)
+	if err != nil {
+		fmt.Println(err, "err <<<")
+		return 0, err
+	}
+
+	return totalRecords, nil
 }

@@ -3,6 +3,7 @@ package main
 import (
     "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+    "github.com/gin-contrib/cors"
     "order-service/handler"
     "order-service/repository"
 )
@@ -25,6 +26,11 @@ func main() {
     httpHandler := handler.NewHTTPHandler(orderRepo)
 
     router := gin.Default()
+
+    // Use CORS middleware to enable CORS
+    config := cors.DefaultConfig()
+    config.AllowOrigins = []string{"http://localhost:5173"} 
+    router.Use(cors.New(config))
 
     router.GET("/orders", httpHandler.GetOrders)
 
