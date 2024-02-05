@@ -14,7 +14,6 @@
           @input="fetchOrders"
         />
       </div>
-      {{keywords}}
     </div>
 
     <div class="col-5 ml-0 pl-0 mt-5 mb-5">
