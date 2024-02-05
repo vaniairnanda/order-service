@@ -22,8 +22,8 @@ func NewHTTPHandler(orderRepo *repository.OrderRepository) *HTTPHandler {
 func (h *HTTPHandler) GetOrders(c *gin.Context) {
 		pageStr := c.Query("page")
 		searchQuery := c.Query("search")
-		startDateStr := c.Query("start_date")
-		endDateStr := c.Query("end_date")
+		startDateStr := c.Query("startDate")
+		endDateStr := c.Query("endDate")
 		sortDirection := c.DefaultQuery("sortDirection", "ASC")
 
 		decodedSearchQuery, err := url.QueryUnescape(searchQuery)

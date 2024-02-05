@@ -8,9 +8,6 @@ import (
 )
 
 func NewDB() (*sql.DB, error) {
-
-	fmt.Println("got here")
-
     host := os.Getenv("DB_HOST")
     port := os.Getenv("DB_PORT")
     user := os.Getenv("DB_USER")
