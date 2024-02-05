@@ -4,3 +4,7 @@
 .idea/*
 *.iml
 .DS_STORE
+
+#docker-volume
+postgres-data
+postgres-test-data
