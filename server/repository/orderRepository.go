@@ -22,7 +22,6 @@ func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirec
 		page = 1
 	}
 
-	fmt.Println(page, "got here")
 	// Calculate offset for pagination
 	offset := (page - 1) * 5
 
@@ -104,14 +103,11 @@ func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirec
 		args = append(args, "%"+searchTerm+"%")
 	}
 
-	fmt.Println("totalRecordsgot here")
-
 	totalRecords, err := repo.countTotalRecords(sqlQuery, args)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	fmt.Println(totalRecords, "???")
 	// Calculate the total number of pages
 	totalPages := (totalRecords + 5 - 1) / 5
 
@@ -122,12 +118,9 @@ func (repo *OrderRepository) GetOrders(searchTerm, startDate, endDate, sortDirec
 	// Execute the query
 	rows, err := repo.db.Query(sqlQuery, args...)
 	if err != nil {
-		fmt.Println(err)
 		return nil, 0, err
 	}
 	defer rows.Close()
-
-	fmt.Println(rows)
 
 	// Parse results
 	var orders []model.JoinedOrder
@@ -156,12 +149,9 @@ func (repo *OrderRepository) countTotalRecords(sqlQuery string, args []interface
 
 	countQuery := "SELECT COUNT(*) FROM (" + sqlQuery + ") AS count_query"
 
-	fmt.Println(countQuery, "query <<<")
-
 	var totalRecords int
 	err := repo.db.QueryRow(countQuery, args...).Scan(&totalRecords)
 	if err != nil {
-		fmt.Println(err, "err <<<")
 		return 0, err
 	}
 

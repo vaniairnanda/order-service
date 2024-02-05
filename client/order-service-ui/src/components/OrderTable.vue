@@ -34,14 +34,13 @@
             <th scope="col">Order Name</th>
             <th scope="col">Customer Company</th>
             <th scope="col">Customer Name</th>
-            <th scope="col">Order Date</th>
+            <th scope="col">Order Date <img @click.prevent="fetchOrders(), this.sort = !this.sort" class="ml-2" src="@/assets/sort.png" alt="Sort Icon" width="10" height="10" /></th>
             <th scope="col">Delivered Amount</th>
             <th scope="col">Total Amount</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="item in listData">
-            <!-- <th scope="row">1</th> -->
             <td>{{ item.order_name }}</td>
             <td>{{ item.customer_company_name }}</td>
             <td>{{ item.customer_name }}</td>
@@ -86,7 +85,8 @@ export default {
         endDate: "",
         totalAmountInPage: null,
         totalPages: 0,
-        currentPage: 1
+        currentPage: 1,
+        sort: false
     };
     },
     mounted() {
@@ -100,7 +100,7 @@ export default {
             this.endDate =  moment(this.date[1]).format('YYYY-MM-DD');
         }    
         const response = await axios.get('http://localhost:8080/orders', {
-          params: { search: this.keywords, startDate: this.startDate, endDate: this.endDate, page: page || 1 }
+          params: { search: this.keywords, startDate: this.startDate, endDate: this.endDate, page: page || 1, sortDirection: this.sort ? "DESC" : "ASC" }
         });
         this.listData = response.data.orders; 
         this.totalPages = response.data.totalPages

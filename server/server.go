@@ -4,21 +4,25 @@ import (
     "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
     "github.com/gin-contrib/cors"
+    "go.uber.org/zap"
     "order-service/handler"
     "order-service/repository"
 )
 
 func main() {
+    loggerConfig := zap.NewDevelopmentConfig()
+	zapLogger, _ := loggerConfig.Build()
+	defer zapLogger.Sync()
+	zap.ReplaceGlobals(zapLogger)
+
     err := godotenv.Load()
     if err != nil {
-        // handle error
-        panic(err)
+        zapLogger.Error(err.Error())
     }
 
     db, err := repository.NewDB()
     if err != nil {
-        // handle error
-        panic(err)
+        zapLogger.Error(err.Error())
     }
     defer db.Close()
 

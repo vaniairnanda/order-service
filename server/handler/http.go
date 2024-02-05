@@ -36,7 +36,6 @@ func (h *HTTPHandler) GetOrders(c *gin.Context) {
 	
 		page, err := strconv.Atoi(pageStr)
 
-		fmt.Println(page, pageStr)
 		if err != nil || page <= 0 {
 			page = 1
 		}
