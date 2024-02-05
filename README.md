@@ -3,6 +3,10 @@
 
 This project includes a script for initializing the database and populating it with data from a CSV file and a server in Golang. Additionally, it provides a simple web application in Vue.js that displays customer order information.
 
+<img width="500" alt="Screen Shot 2024-02-05 at 23 17 45" src="https://github.com/vaniairnanda/order-service/assets/55880424/86c7f904-81cb-445e-8a91-fd259bcb6259">
+<img width="500" alt="Screen Shot 2024-02-05 at 23 20 51" src="https://github.com/vaniairnanda/order-service/assets/55880424/64bd6354-5d19-4b79-9c6c-227b55a6ac34">
+
+
 ## Sample API Call
 
 Perform a GET request to retrieve a paginated list of orders with optional search, sorting, and date range parameters.
