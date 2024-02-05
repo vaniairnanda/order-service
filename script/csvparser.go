@@ -37,7 +37,7 @@ func parseCSV(filePath string) ([][]string, error) {
 func createCustomerCompaniesTable(db *sql.DB) error {
 	_, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS customer_companies (
-			id SERIAL PRIMARY KEY,
+			company_id SERIAL PRIMARY KEY,
 			company_name VARCHAR(255)
 		);
 	`)
@@ -171,11 +171,11 @@ func seedDeliveries(db *sql.DB, filePath string) error {
 	return nil
 }
 
-func insertCustomerCompany(db *sql.DB, id int, companyName string) error {
+func insertCustomerCompany(db *sql.DB, companyId int, companyName string) error {
 	_, err := db.Exec(`
-		INSERT INTO customer_companies (id, company_name)
+		INSERT INTO customer_companies (company_id, company_name)
 		VALUES ($1, $2)`,
-		id, companyName,
+		companyId, companyName,
 	)
 	return err
 }
@@ -256,7 +256,6 @@ func insertOrdersFromCSV(db *sql.DB, filePath string) error {
 
 	for _, record := range records {
 		createdAtStr := record[1] 
-		fmt.Println(createdAtStr)
 		createdAt, err := time.Parse(time.RFC3339, createdAtStr)
 		if err != nil {
 			return err
@@ -305,7 +304,7 @@ func main() {
 	}
 	defer db.Close()
 
-	Seed data from CSV files
+	//Seed data from CSV files
 	err = seedCustomerCompanies(db, "./script/resources/customer_companies.csv")
 	if err != nil {
 		log.Fatal(err)
